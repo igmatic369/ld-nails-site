@@ -1,0 +1,190 @@
+import { Check, Heart, Award, Users } from "lucide-react";
+import { useTheme } from "../context/ThemeContext";
+import { assetUrl } from "../lib/assets";
+import content from "@/content.json";
+import type { LucideIcon } from "lucide-react";
+
+const iconMap: Record<string, LucideIcon> = { Heart, Award, Users };
+
+export default function About() {
+  const { theme } = useTheme();
+
+  const getThemeClasses = () => {
+    switch (theme) {
+      case "luxury":
+        return {
+          bg: "bg-[#1a1a1a]",
+          cardBg: "bg-[#2a2a2a]",
+          text: "text-white",
+          subtext: "text-gray-300",
+          accent: "text-[#d4a574]",
+          accentBg: "bg-[#d4a574]",
+        };
+      case "warmth":
+        return {
+          bg: "bg-[#faf8f5]",
+          cardBg: "bg-white",
+          text: "text-[#5a4a42]",
+          subtext: "text-[#7a6a62]",
+          accent: "text-[#d4a59a]",
+          accentBg: "bg-[#d4a59a]",
+        };
+      case "bold":
+        return {
+          bg: "bg-white",
+          cardBg: "bg-gray-50",
+          text: "text-gray-900",
+          subtext: "text-gray-600",
+          accent: "text-[#e91e8c]",
+          accentBg: "bg-[#e91e8c]",
+        };
+    }
+  };
+
+  const classes = getThemeClasses();
+
+  return (
+    <div className={classes.bg}>
+      {/* Hero Section */}
+      <section className="relative h-[400px] overflow-hidden">
+        <div
+          className="absolute inset-0 bg-cover bg-center"
+          style={{
+            backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url(${assetUrl(content.about.hero_image)})`,
+          }}
+        />
+        <div className="relative container mx-auto px-4 h-full flex items-center">
+          <div className="max-w-3xl">
+            <h1
+              className={`text-5xl md:text-6xl font-bold text-white mb-4 ${
+                theme === "bold" ? "font-display" : ""
+              }`}
+              style={
+                theme === "bold"
+                  ? { fontFamily: "'Abril Fatface', serif" }
+                  : theme === "luxury"
+                  ? { fontFamily: "'Playfair Display', serif" }
+                  : {}
+              }
+            >
+              {content.about.hero_headline}
+            </h1>
+            <p className="text-xl text-white">
+              {content.about.hero_subtext}
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Main Content */}
+      <section className="py-16">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto">
+            <div className={`${classes.cardBg} rounded-2xl p-8 md:p-12 shadow-xl`}>
+              <h2
+                className={`text-4xl font-bold ${classes.text} mb-6 ${
+                  theme === "bold" ? "font-display" : ""
+                }`}
+                style={
+                  theme === "bold"
+                    ? { fontFamily: "'Abril Fatface', serif" }
+                    : theme === "luxury"
+                    ? { fontFamily: "'Playfair Display', serif" }
+                    : {}
+                }
+              >
+                {content.about.section_title}
+              </h2>
+              <div className={`${classes.subtext} text-lg space-y-4 mb-8`}>
+                {content.about.body_paragraphs.map((para, i) => (
+                  <p key={i}>{para}</p>
+                ))}
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-6 mt-8">
+                {content.about.features.map((feature, index) => (
+                  <div key={index} className="flex items-start space-x-3">
+                    <div className={`${classes.accentBg} rounded-full p-1 mt-1`}>
+                      <Check className="w-5 h-5 text-white" />
+                    </div>
+                    <p className={`${classes.text} text-lg`}>{feature}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Values Section */}
+      <section className={`py-16 ${classes.cardBg}`}>
+        <div className="container mx-auto px-4">
+          <h2
+            className={`text-4xl font-bold ${classes.text} mb-12 text-center ${
+              theme === "bold" ? "font-display" : ""
+            }`}
+            style={
+              theme === "bold"
+                ? { fontFamily: "'Abril Fatface', serif" }
+                : theme === "luxury"
+                ? { fontFamily: "'Playfair Display', serif" }
+                : {}
+            }
+          >
+            {content.about.values_section_headline}
+          </h2>
+          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            {content.about.values.map((value, index) => {
+              const Icon = iconMap[value.icon] ?? Heart;
+              return (
+                <div key={index} className={`${classes.bg} p-8 rounded-xl shadow-lg text-center`}>
+                  <div
+                    className={`${classes.accentBg} w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4`}
+                  >
+                    <Icon className="w-8 h-8 text-white" />
+                  </div>
+                  <h3 className={`text-2xl font-bold ${classes.text} mb-3`}>
+                    {value.title}
+                  </h3>
+                  <p className={classes.subtext}>{value.description}</p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* Location Info */}
+      <section className="py-16">
+        <div className="container mx-auto px-4">
+          <div className={`${classes.cardBg} rounded-2xl p-8 md:p-12 shadow-xl max-w-4xl mx-auto text-center`}>
+            <h2
+              className={`text-3xl font-bold ${classes.text} mb-6 ${
+                theme === "bold" ? "font-display" : ""
+              }`}
+              style={
+                theme === "bold"
+                  ? { fontFamily: "'Abril Fatface', serif" }
+                  : theme === "luxury"
+                  ? { fontFamily: "'Playfair Display', serif" }
+                  : {}
+              }
+            >
+              {content.about.visit_title}
+            </h2>
+            <p className={`${classes.subtext} text-lg mb-6`}>
+              {content.about.visit_body}
+            </p>
+            <div className={`${classes.text} text-lg space-y-2`}>
+              <p>{content.business.address_line1}</p>
+              <p>{content.business.address_line2}, {content.business.address_country}</p>
+              <p className={`${classes.accent} font-semibold mt-4`}>
+                {content.business.phone_display}
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+}
