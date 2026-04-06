@@ -2,12 +2,13 @@ import { Link } from "react-router";
 import { Star, Sparkles, Clock, Heart, ArrowRight } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
 import { assetUrl } from "../lib/assets";
-import content from "@/content.json";
+import { useContent } from "../hooks/useContent";
 
 const featuredIcons = [Sparkles, Heart, Clock];
 
 export default function Home() {
   const { theme } = useTheme();
+  const content = useContent();
 
   const getThemeClasses = () => {
     switch (theme) {
@@ -76,13 +77,14 @@ export default function Home() {
                   ? { fontFamily: "'Playfair Display', serif" }
                   : {}
               }
+              data-content-key="hero.headline"
             >
               {content.hero.headline}
             </h1>
-            <p className={`${classes.subtext} text-2xl md:text-3xl mb-4`}>
+            <p className={`${classes.subtext} text-2xl md:text-3xl mb-4`} data-content-key="hero.subheadline">
               {content.hero.subheadline}
             </p>
-            <p className={`${classes.subtext} text-xl mb-12`}>
+            <p className={`${classes.subtext} text-xl mb-12`} data-content-key="hero.body">
               {content.hero.body}
             </p>
             <div className="flex flex-wrap justify-center gap-4">
@@ -90,14 +92,14 @@ export default function Home() {
                 to={content.hero.cta_primary_link}
                 className={`${classes.buttonBg} ${classes.buttonText} px-8 py-4 rounded-full font-semibold ${classes.buttonHover} transition-colors inline-flex items-center space-x-2`}
               >
-                <span>{content.hero.cta_primary_text}</span>
+                <span data-content-key="hero.cta_primary_text">{content.hero.cta_primary_text}</span>
                 <ArrowRight className="w-5 h-5" />
               </Link>
               <a
                 href={content.hero.cta_secondary_link}
                 className={`${classes.accent} border-2 ${classes.borderColor} px-8 py-4 rounded-full font-semibold hover:opacity-80 transition-opacity inline-block`}
               >
-                {content.business.phone_display}
+                <span data-content-key="business.phone_display">{content.business.phone_display}</span>
               </a>
             </div>
           </div>
@@ -118,6 +120,7 @@ export default function Home() {
                 ? { fontFamily: "'Playfair Display', serif" }
                 : {}
             }
+            data-content-key="hero.services_section_headline"
           >
             {content.hero.services_section_headline}
           </h2>
@@ -128,14 +131,18 @@ export default function Home() {
                 <div
                   key={index}
                   className={`${classes.bg} p-8 rounded-xl shadow-lg text-center hover:shadow-2xl transition-shadow`}
+                  data-reorderable="hero.featured_services"
+                  data-reorder-index={index}
                 >
                   <div className={`${classes.accentBg} w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4`}>
                     <Icon className="w-8 h-8 text-white" />
                   </div>
-                  <h3 className={`text-2xl font-bold ${classes.text} mb-3`}>
+                  <h3 className={`text-2xl font-bold ${classes.text} mb-3`} data-content-key={`hero.featured_services.${index}.title`}>
                     {service.title}
                   </h3>
-                  <p className={classes.subtext}>{service.description}</p>
+                  <p className={classes.subtext} data-content-key={`hero.featured_services.${index}.description`}>
+                    {service.description}
+                  </p>
                 </div>
               );
             })}
@@ -166,10 +173,11 @@ export default function Home() {
                 ? { fontFamily: "'Playfair Display', serif" }
                 : {}
             }
+            data-content-key="hero.gallery_section_headline"
           >
             {content.hero.gallery_section_headline}
           </h2>
-          <p className={`${classes.subtext} text-xl mb-12 text-center max-w-2xl mx-auto`}>
+          <p className={`${classes.subtext} text-xl mb-12 text-center max-w-2xl mx-auto`} data-content-key="hero.gallery_section_body">
             {content.hero.gallery_section_body}
           </p>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -212,6 +220,7 @@ export default function Home() {
                 ? { fontFamily: "'Playfair Display', serif" }
                 : {}
             }
+            data-content-key="hero.reviews_section_headline"
           >
             {content.hero.reviews_section_headline}
           </h2>
@@ -220,6 +229,8 @@ export default function Home() {
               <div
                 key={index}
                 className={`${classes.bg} p-6 rounded-xl shadow-lg`}
+                data-reorderable="reviews"
+                data-reorder-index={index}
               >
                 <div className="flex mb-4">
                   {[...Array(5)].map((_, i) => (
@@ -229,8 +240,10 @@ export default function Home() {
                     />
                   ))}
                 </div>
-                <p className={`${classes.text} mb-4 italic`}>"{review.text}"</p>
-                <p className={`${classes.accent} font-semibold`}>
+                <p className={`${classes.text} mb-4 italic`} data-content-key={`reviews.${index}.text`}>
+                  "{review.text}"
+                </p>
+                <p className={`${classes.accent} font-semibold`} data-content-key={`reviews.${index}.author`}>
                   — {review.author}
                 </p>
               </div>
@@ -253,10 +266,11 @@ export default function Home() {
                 ? { fontFamily: "'Playfair Display', serif" }
                 : {}
             }
+            data-content-key="hero.cta_section_headline"
           >
             {content.hero.cta_section_headline}
           </h2>
-          <p className="text-xl text-white mb-8 max-w-2xl mx-auto">
+          <p className="text-xl text-white mb-8 max-w-2xl mx-auto" data-content-key="hero.cta_section_body">
             {content.hero.cta_section_body}
           </p>
           <div className="flex flex-wrap justify-center gap-4">

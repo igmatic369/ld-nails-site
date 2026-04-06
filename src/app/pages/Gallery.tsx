@@ -1,9 +1,10 @@
 import { useTheme } from "../context/ThemeContext";
 import { assetUrl } from "../lib/assets";
-import content from "@/content.json";
+import { useContent } from "../hooks/useContent";
 
 export default function Gallery() {
   const { theme } = useTheme();
+  const content = useContent();
 
   const getThemeClasses = () => {
     switch (theme) {
@@ -53,10 +54,11 @@ export default function Gallery() {
                   ? { fontFamily: "'Playfair Display', serif" }
                   : {}
               }
+              data-content-key="gallery.headline"
             >
               {content.gallery.headline}
             </h1>
-            <p className={`${classes.subtext} text-xl`}>
+            <p className={`${classes.subtext} text-xl`} data-content-key="gallery.body">
               {content.gallery.body}
             </p>
           </div>
@@ -67,6 +69,8 @@ export default function Gallery() {
               <div
                 key={index}
                 className={`${classes.cardBg} rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-shadow break-inside-avoid`}
+                data-reorderable="gallery.images"
+                data-reorder-index={index}
               >
                 <img
                   src={assetUrl(image.src)}
@@ -93,10 +97,11 @@ export default function Gallery() {
                 ? { fontFamily: "'Playfair Display', serif" }
                 : {}
             }
+            data-content-key="gallery.cta_headline"
           >
             {content.gallery.cta_headline}
           </h2>
-          <p className={`${classes.subtext} text-xl mb-8 max-w-2xl mx-auto`}>
+          <p className={`${classes.subtext} text-xl mb-8 max-w-2xl mx-auto`} data-content-key="gallery.cta_body">
             {content.gallery.cta_body}
           </p>
           <div className="flex flex-wrap justify-center gap-4">
@@ -110,7 +115,7 @@ export default function Gallery() {
                   : "border-[#e91e8c]"
               } px-8 py-4 rounded-full font-semibold hover:opacity-80 transition-opacity inline-block`}
             >
-              Call {content.business.phone_display}
+              Call <span data-content-key="business.phone_display">{content.business.phone_display}</span>
             </a>
             <a
               href="/contact"
@@ -142,10 +147,11 @@ export default function Gallery() {
                 ? { fontFamily: "'Playfair Display', serif" }
                 : {}
             }
+            data-content-key="gallery.follow_headline"
           >
             {content.gallery.follow_headline}
           </h2>
-          <p className={`${classes.subtext} mb-6`}>
+          <p className={`${classes.subtext} mb-6`} data-content-key="gallery.follow_body">
             {content.gallery.follow_body}
           </p>
           <a
@@ -153,6 +159,7 @@ export default function Gallery() {
             target="_blank"
             rel="noopener noreferrer"
             className={`${classes.accent} text-lg font-semibold hover:opacity-80 transition-opacity inline-block`}
+            data-content-key="business.facebook_handle"
           >
             {content.business.facebook_handle}
           </a>

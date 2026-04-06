@@ -1,13 +1,40 @@
 import { Check, Heart, Award, Users } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
-import { assetUrl } from "../lib/assets";
-import content from "@/content.json";
+import { imageSrc } from "../lib/assets";
+import { useContent } from "../hooks/useContent";
 import type { LucideIcon } from "lucide-react";
 
 const iconMap: Record<string, LucideIcon> = { Heart, Award, Users };
 
+const isPreview =
+  typeof window !== "undefined" &&
+  new URLSearchParams(window.location.search).get("preview") === "true";
+
+function openBgUpload(contentKey: string) {
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = "image/*";
+  input.onchange = () => {
+    const file = input.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      window.parent.postMessage({
+        type: "preview-image-upload",
+        fileData: ev.target?.result,
+        fileName: file.name,
+        mimeType: file.type,
+        contentKey,
+      }, "*");
+    };
+    reader.readAsDataURL(file);
+  };
+  input.click();
+}
+
 export default function About() {
   const { theme } = useTheme();
+  const content = useContent();
 
   const getThemeClasses = () => {
     switch (theme) {
@@ -50,9 +77,17 @@ export default function About() {
         <div
           className="absolute inset-0 bg-cover bg-center"
           style={{
-            backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url(${assetUrl(content.about.hero_image)})`,
+            backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url(${imageSrc(content.about.hero_image)})`,
           }}
         />
+        {isPreview && (
+          <button
+            onClick={() => openBgUpload("about.hero_image")}
+            className="absolute top-4 right-4 z-20 bg-black/60 hover:bg-black/80 text-white px-4 py-2 rounded-full text-sm font-semibold transition-all cursor-pointer"
+          >
+            📷 Change Background
+          </button>
+        )}
         <div className="relative container mx-auto px-4 h-full flex items-center">
           <div className="max-w-3xl">
             <h1
@@ -66,10 +101,11 @@ export default function About() {
                   ? { fontFamily: "'Playfair Display', serif" }
                   : {}
               }
+              data-content-key="about.hero_headline"
             >
               {content.about.hero_headline}
             </h1>
-            <p className="text-xl text-white">
+            <p className="text-xl text-white" data-content-key="about.hero_subtext">
               {content.about.hero_subtext}
             </p>
           </div>
@@ -92,22 +128,30 @@ export default function About() {
                     ? { fontFamily: "'Playfair Display', serif" }
                     : {}
                 }
+                data-content-key="about.section_title"
               >
                 {content.about.section_title}
               </h2>
               <div className={`${classes.subtext} text-lg space-y-4 mb-8`}>
                 {content.about.body_paragraphs.map((para, i) => (
-                  <p key={i}>{para}</p>
+                  <p key={i} data-content-key={`about.body_paragraphs.${i}`}>{para}</p>
                 ))}
               </div>
 
               <div className="grid md:grid-cols-2 gap-6 mt-8">
                 {content.about.features.map((feature, index) => (
-                  <div key={index} className="flex items-start space-x-3">
+                  <div
+                    key={index}
+                    className="flex items-start space-x-3"
+                    data-reorderable="about.features"
+                    data-reorder-index={index}
+                  >
                     <div className={`${classes.accentBg} rounded-full p-1 mt-1`}>
                       <Check className="w-5 h-5 text-white" />
                     </div>
-                    <p className={`${classes.text} text-lg`}>{feature}</p>
+                    <p className={`${classes.text} text-lg`} data-content-key={`about.features.${index}`}>
+                      {feature}
+                    </p>
                   </div>
                 ))}
               </div>
@@ -130,6 +174,7 @@ export default function About() {
                 ? { fontFamily: "'Playfair Display', serif" }
                 : {}
             }
+            data-content-key="about.values_section_headline"
           >
             {content.about.values_section_headline}
           </h2>
@@ -137,16 +182,29 @@ export default function About() {
             {content.about.values.map((value, index) => {
               const Icon = iconMap[value.icon] ?? Heart;
               return (
-                <div key={index} className={`${classes.bg} p-8 rounded-xl shadow-lg text-center`}>
+                <div
+                  key={index}
+                  className={`${classes.bg} p-8 rounded-xl shadow-lg text-center`}
+                  data-reorderable="about.values"
+                  data-reorder-index={index}
+                >
                   <div
                     className={`${classes.accentBg} w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4`}
                   >
                     <Icon className="w-8 h-8 text-white" />
                   </div>
-                  <h3 className={`text-2xl font-bold ${classes.text} mb-3`}>
+                  <h3
+                    className={`text-2xl font-bold ${classes.text} mb-3`}
+                    data-content-key={`about.values.${index}.title`}
+                  >
                     {value.title}
                   </h3>
-                  <p className={classes.subtext}>{value.description}</p>
+                  <p
+                    className={classes.subtext}
+                    data-content-key={`about.values.${index}.description`}
+                  >
+                    {value.description}
+                  </p>
                 </div>
               );
             })}
@@ -169,16 +227,20 @@ export default function About() {
                   ? { fontFamily: "'Playfair Display', serif" }
                   : {}
               }
+              data-content-key="about.visit_title"
             >
               {content.about.visit_title}
             </h2>
-            <p className={`${classes.subtext} text-lg mb-6`}>
+            <p className={`${classes.subtext} text-lg mb-6`} data-content-key="about.visit_body">
               {content.about.visit_body}
             </p>
             <div className={`${classes.text} text-lg space-y-2`}>
-              <p>{content.business.address_line1}</p>
-              <p>{content.business.address_line2}, {content.business.address_country}</p>
-              <p className={`${classes.accent} font-semibold mt-4`}>
+              <p data-content-key="business.address_line1">{content.business.address_line1}</p>
+              <p>
+                <span data-content-key="business.address_line2">{content.business.address_line2}</span>,{" "}
+                <span data-content-key="business.address_country">{content.business.address_country}</span>
+              </p>
+              <p className={`${classes.accent} font-semibold mt-4`} data-content-key="business.phone_display">
                 {content.business.phone_display}
               </p>
             </div>

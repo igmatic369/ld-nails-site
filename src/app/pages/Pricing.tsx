@@ -1,15 +1,19 @@
 import { useTheme } from "../context/ThemeContext";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
-import content from "@/content.json";
-
-// Reconstruct keyed lookup from the sections array so all three theme
-// layouts can access pricing data by key, matching the original structure.
-const pricingData = Object.fromEntries(
-  content.pricing.sections.map((s) => [s.key, s.items])
-) as Record<string, { name: string; price: string }[]>
+import { useContent } from "../hooks/useContent";
 
 export default function Pricing() {
   const { theme } = useTheme();
+  const content = useContent();
+
+  // Keyed lookup rebuilt from sections array — must be inside component since content comes from hook
+  const pricingData = Object.fromEntries(
+    content.pricing.sections.map((s) => [s.key, s.items])
+  ) as Record<string, { name: string; price: string }[]>
+
+  const sectionByKey = Object.fromEntries(
+    content.pricing.sections.map((s) => [s.key, s])
+  )
 
   const getThemeClasses = () => {
     switch (theme) {
@@ -45,6 +49,28 @@ export default function Pricing() {
 
   const classes = getThemeClasses();
 
+  // Helper: render pricing items for a given section key
+  function PricingItems({ sectionKey, sectionIndex }: { sectionKey: string; sectionIndex: number }) {
+    const items = pricingData[sectionKey] ?? []
+    return (
+      <>
+        {items.map((item, index) => (
+          <div
+            key={index}
+            className="flex justify-between items-start pb-2 border-b border-gray-200 last:border-0"
+          >
+            <span className={`${classes.text} flex-1`} data-content-key={`pricing.sections.${sectionIndex}.items.${index}.name`}>
+              {item.name}
+            </span>
+            <span className={`${classes.accent} font-semibold ml-2`} data-content-key={`pricing.sections.${sectionIndex}.items.${index}.price`}>
+              {item.price}
+            </span>
+          </div>
+        ))}
+      </>
+    )
+  }
+
   // For warmth theme with tabs
   if (theme === "warmth") {
     return (
@@ -52,12 +78,10 @@ export default function Pricing() {
         <section className="py-16">
           <div className="container mx-auto px-4">
             <div className="text-center max-w-3xl mx-auto mb-12">
-              <h1
-                className={`text-5xl md:text-6xl font-bold ${classes.text} mb-6`}
-              >
+              <h1 className={`text-5xl md:text-6xl font-bold ${classes.text} mb-6`}>
                 Pricing
               </h1>
-              <p className={`${classes.subtext} text-xl`}>
+              <p className={`${classes.subtext} text-xl`} data-content-key="pricing.intro">
                 {content.pricing.intro}
               </p>
             </div>
@@ -65,22 +89,24 @@ export default function Pricing() {
             <div className={`max-w-4xl mx-auto ${classes.cardBg} rounded-2xl p-8 shadow-xl`}>
               <Tabs defaultValue={content.pricing.sections[0].key} className="w-full">
                 <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6 mb-8">
-                  {content.pricing.sections.map((section) => (
+                  {content.pricing.sections.map((section, sectionIndex) => (
                     <TabsTrigger key={section.key} value={section.key}>
-                      {section.title}
+                      <span data-content-key={`pricing.sections.${sectionIndex}.title`}>{section.title}</span>
                     </TabsTrigger>
                   ))}
                 </TabsList>
 
-                {content.pricing.sections.map((section) => (
+                {content.pricing.sections.map((section, sectionIndex) => (
                   <TabsContent key={section.key} value={section.key} className="space-y-4">
                     {section.items.map((item, index) => (
                       <div
                         key={index}
                         className="flex justify-between items-center py-3 border-b border-gray-200 last:border-0"
                       >
-                        <span className={classes.text}>{item.name}</span>
-                        <span className={`${classes.accent} font-semibold`}>
+                        <span className={classes.text} data-content-key={`pricing.sections.${sectionIndex}.items.${index}.name`}>
+                          {item.name}
+                        </span>
+                        <span className={`${classes.accent} font-semibold`} data-content-key={`pricing.sections.${sectionIndex}.items.${index}.price`}>
                           {item.price}
                         </span>
                       </div>
@@ -100,7 +126,7 @@ export default function Pricing() {
             <p className={`${classes.subtext} text-xl mb-4 max-w-2xl mx-auto`}>
               Call us today or visit our contact page to schedule your appointment.
             </p>
-            <p className={`${classes.subtext} mb-8 max-w-2xl mx-auto`}>
+            <p className={`${classes.subtext} mb-8 max-w-2xl mx-auto`} data-content-key="contact.gift_cards_note">
               {content.contact.gift_cards_note}
             </p>
             <a
@@ -117,6 +143,10 @@ export default function Pricing() {
 
   // For bold theme with 3 columns
   if (theme === "bold") {
+    const col1Sections = ["artificialNails", "nailCare"]
+    const col2Sections = ["kids", "waxFace", "waxBody"]
+    const col3Sections = ["spaExtras"]
+
     return (
       <div className={classes.bg}>
         <section className="py-16">
@@ -128,7 +158,7 @@ export default function Pricing() {
               >
                 Pricing
               </h1>
-              <p className={`${classes.subtext} text-xl`}>
+              <p className={`${classes.subtext} text-xl`} data-content-key="pricing.intro">
                 {content.pricing.intro}
               </p>
             </div>
@@ -136,131 +166,71 @@ export default function Pricing() {
             <div className="grid md:grid-cols-3 gap-8 mb-12">
               {/* Column 1 */}
               <div className={`${classes.cardBg} rounded-xl p-8 shadow-lg`}>
-                <h2
-                  className={`text-3xl font-bold ${classes.accent} mb-6 font-display`}
-                  style={{ fontFamily: "'Abril Fatface', serif" }}
-                >
-                  Artificial Nails
-                </h2>
-                <div className="space-y-4 mb-8">
-                  {pricingData.artificialNails.map((item, index) => (
-                    <div
-                      key={index}
-                      className="flex justify-between items-start pb-2 border-b border-gray-200"
-                    >
-                      <span className={`${classes.text} flex-1`}>{item.name}</span>
-                      <span className={`${classes.accent} font-semibold ml-2`}>
-                        {item.price}
-                      </span>
+                {col1Sections.map((key) => {
+                  const sec = sectionByKey[key]
+                  if (!sec) return null
+                  const sectionIndex = content.pricing.sections.findIndex((s) => s.key === key)
+                  return (
+                    <div key={key} className="mb-8 last:mb-0">
+                      <h2
+                        className={`text-3xl font-bold ${classes.accent} mb-6 font-display`}
+                        style={{ fontFamily: "'Abril Fatface', serif" }}
+                        data-content-key={`pricing.sections.${sectionIndex}.title`}
+                      >
+                        {sec.title}
+                      </h2>
+                      <div className="space-y-4">
+                        <PricingItems sectionKey={key} sectionIndex={sectionIndex} />
+                      </div>
                     </div>
-                  ))}
-                </div>
-
-                <h2
-                  className={`text-3xl font-bold ${classes.accent} mb-6 font-display mt-8`}
-                  style={{ fontFamily: "'Abril Fatface', serif" }}
-                >
-                  Nail Care
-                </h2>
-                <div className="space-y-4">
-                  {pricingData.nailCare.map((item, index) => (
-                    <div
-                      key={index}
-                      className="flex justify-between items-start pb-2 border-b border-gray-200"
-                    >
-                      <span className={`${classes.text} flex-1`}>{item.name}</span>
-                      <span className={`${classes.accent} font-semibold ml-2`}>
-                        {item.price}
-                      </span>
-                    </div>
-                  ))}
-                </div>
+                  )
+                })}
               </div>
 
               {/* Column 2 */}
               <div className={`${classes.cardBg} rounded-xl p-8 shadow-lg`}>
-                <h2
-                  className={`text-3xl font-bold ${classes.accent} mb-6 font-display`}
-                  style={{ fontFamily: "'Abril Fatface', serif" }}
-                >
-                  Kids
-                </h2>
-                <div className="space-y-4 mb-8">
-                  {pricingData.kids.map((item, index) => (
-                    <div
-                      key={index}
-                      className="flex justify-between items-start pb-2 border-b border-gray-200"
-                    >
-                      <span className={`${classes.text} flex-1`}>{item.name}</span>
-                      <span className={`${classes.accent} font-semibold ml-2`}>
-                        {item.price}
-                      </span>
+                {col2Sections.map((key) => {
+                  const sec = sectionByKey[key]
+                  if (!sec) return null
+                  const sectionIndex = content.pricing.sections.findIndex((s) => s.key === key)
+                  return (
+                    <div key={key} className="mb-8 last:mb-0">
+                      <h2
+                        className={`text-3xl font-bold ${classes.accent} mb-6 font-display`}
+                        style={{ fontFamily: "'Abril Fatface', serif" }}
+                        data-content-key={`pricing.sections.${sectionIndex}.title`}
+                      >
+                        {sec.title}
+                      </h2>
+                      <div className="space-y-4">
+                        <PricingItems sectionKey={key} sectionIndex={sectionIndex} />
+                      </div>
                     </div>
-                  ))}
-                </div>
-
-                <h2
-                  className={`text-3xl font-bold ${classes.accent} mb-6 font-display mt-8`}
-                  style={{ fontFamily: "'Abril Fatface', serif" }}
-                >
-                  Wax - Face
-                </h2>
-                <div className="space-y-4 mb-8">
-                  {pricingData.waxFace.map((item, index) => (
-                    <div
-                      key={index}
-                      className="flex justify-between items-start pb-2 border-b border-gray-200"
-                    >
-                      <span className={`${classes.text} flex-1`}>{item.name}</span>
-                      <span className={`${classes.accent} font-semibold ml-2`}>
-                        {item.price}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-
-                <h2
-                  className={`text-3xl font-bold ${classes.accent} mb-6 font-display mt-8`}
-                  style={{ fontFamily: "'Abril Fatface', serif" }}
-                >
-                  Wax - Body
-                </h2>
-                <div className="space-y-4">
-                  {pricingData.waxBody.map((item, index) => (
-                    <div
-                      key={index}
-                      className="flex justify-between items-start pb-2 border-b border-gray-200"
-                    >
-                      <span className={`${classes.text} flex-1`}>{item.name}</span>
-                      <span className={`${classes.accent} font-semibold ml-2`}>
-                        {item.price}
-                      </span>
-                    </div>
-                  ))}
-                </div>
+                  )
+                })}
               </div>
 
               {/* Column 3 */}
               <div className={`${classes.cardBg} rounded-xl p-8 shadow-lg`}>
-                <h2
-                  className={`text-3xl font-bold ${classes.accent} mb-6 font-display`}
-                  style={{ fontFamily: "'Abril Fatface', serif" }}
-                >
-                  Spa & Extras
-                </h2>
-                <div className="space-y-4">
-                  {pricingData.spaExtras.map((item, index) => (
-                    <div
-                      key={index}
-                      className="flex justify-between items-start pb-2 border-b border-gray-200"
-                    >
-                      <span className={`${classes.text} flex-1`}>{item.name}</span>
-                      <span className={`${classes.accent} font-semibold ml-2`}>
-                        {item.price}
-                      </span>
+                {col3Sections.map((key) => {
+                  const sec = sectionByKey[key]
+                  if (!sec) return null
+                  const sectionIndex = content.pricing.sections.findIndex((s) => s.key === key)
+                  return (
+                    <div key={key} className="mb-8 last:mb-0">
+                      <h2
+                        className={`text-3xl font-bold ${classes.accent} mb-6 font-display`}
+                        style={{ fontFamily: "'Abril Fatface', serif" }}
+                        data-content-key={`pricing.sections.${sectionIndex}.title`}
+                      >
+                        {sec.title}
+                      </h2>
+                      <div className="space-y-4">
+                        <PricingItems sectionKey={key} sectionIndex={sectionIndex} />
+                      </div>
                     </div>
-                  ))}
-                </div>
+                  )
+                })}
               </div>
             </div>
           </div>
@@ -277,7 +247,7 @@ export default function Pricing() {
             <p className="text-xl text-white mb-4 max-w-2xl mx-auto">
               Call us or visit our contact page to schedule. Walk-ins always welcome!
             </p>
-            <p className="text-lg text-white mb-8 max-w-2xl mx-auto">
+            <p className="text-lg text-white mb-8 max-w-2xl mx-auto" data-content-key="contact.gift_cards_note">
               {content.contact.gift_cards_note}
             </p>
             <a
@@ -304,17 +274,18 @@ export default function Pricing() {
             >
               Pricing
             </h1>
-            <p className={`${classes.subtext} text-xl`}>
+            <p className={`${classes.subtext} text-xl`} data-content-key="pricing.intro">
               {content.pricing.intro}
             </p>
           </div>
 
           <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-8">
-            {content.pricing.sections.map((section) => (
+            {content.pricing.sections.map((section, sectionIndex) => (
               <div key={section.key} className={`${classes.cardBg} rounded-xl p-8 shadow-lg`}>
                 <h2
                   className={`text-2xl font-bold ${classes.accent} mb-6 font-serif`}
                   style={{ fontFamily: "'Playfair Display', serif" }}
+                  data-content-key={`pricing.sections.${sectionIndex}.title`}
                 >
                   {section.title}
                 </h2>
@@ -324,8 +295,10 @@ export default function Pricing() {
                       key={index}
                       className="flex justify-between items-start pb-3 border-b border-gray-700 last:border-0"
                     >
-                      <span className={`${classes.text} flex-1`}>{item.name}</span>
-                      <span className={`${classes.accent} font-semibold ml-4`}>
+                      <span className={`${classes.text} flex-1`} data-content-key={`pricing.sections.${sectionIndex}.items.${index}.name`}>
+                        {item.name}
+                      </span>
+                      <span className={`${classes.accent} font-semibold ml-4`} data-content-key={`pricing.sections.${sectionIndex}.items.${index}.price`}>
                         {item.price}
                       </span>
                     </div>
@@ -348,7 +321,7 @@ export default function Pricing() {
           <p className="text-xl text-[#1a1a1a] mb-4 max-w-2xl mx-auto">
             Experience luxury nail care. Book your appointment today.
           </p>
-          <p className="text-lg text-[#1a1a1a] mb-8 max-w-2xl mx-auto">
+          <p className="text-lg text-[#1a1a1a] mb-8 max-w-2xl mx-auto" data-content-key="contact.gift_cards_note">
             {content.contact.gift_cards_note}
           </p>
           <a

@@ -226,12 +226,24 @@
       "author": "Michelle K."
     }
   ],
+  "services_page": {
+    "headline": "Our Services",
+    "intro": "From classic manicures to custom nail art, we offer a full range of nail care and spa services to make you look and feel amazing.",
+    "gift_cards_headline": "Gift Cards Available"
+  },
+  "footer": {
+    "contact_heading": "Contact Us",
+    "hours_heading": "Hours of Operation",
+    "links_heading": "Quick Links"
+  },
   "contact": {
     "headline": "Contact & Book",
     "intro": "Ready for beautiful nails? Book your appointment or walk in anytime. We're here to make you look and feel amazing!",
     "form_title": "Book an Appointment",
     "form_success": "Thank you! We'll contact you soon to confirm your appointment.",
     "services_list": ["Artificial Nails","Manicure","Pedicure","Waxing","Massage","Facial","Kids Services","Other"],
+    "info_heading": "Contact Information",
+    "hours_heading": "Hours of Operation",
     "walk_ins_note": "Walk-ins welcome · Appointments preferred",
     "gift_cards_note": "Gift cards available for purchase in-person only",
     "storefront_image": "e32dea6253fd169a95d88a87593b5744ce009cc5.png",

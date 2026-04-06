@@ -1,11 +1,38 @@
 import { useState } from "react";
 import { MapPin, Phone, Clock, Facebook, Send } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
-import { assetUrl } from "../lib/assets";
-import content from "@/content.json";
+import { imageSrc } from "../lib/assets";
+import { useContent } from "../hooks/useContent";
+
+const isPreview =
+  typeof window !== "undefined" &&
+  new URLSearchParams(window.location.search).get("preview") === "true";
+
+function openImgUpload(contentKey: string) {
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = "image/*";
+  input.onchange = () => {
+    const file = input.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      window.parent.postMessage({
+        type: "preview-image-upload",
+        fileData: ev.target?.result,
+        fileName: file.name,
+        mimeType: file.type,
+        contentKey,
+      }, "*");
+    };
+    reader.readAsDataURL(file);
+  };
+  input.click();
+}
 
 export default function Contact() {
   const { theme } = useTheme();
+  const content = useContent();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -63,7 +90,6 @@ export default function Contact() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitted(true);
-    // In a real application, this would send data to a backend
     setTimeout(() => {
       setFormData({
         name: "",
@@ -106,10 +132,11 @@ export default function Contact() {
                   ? { fontFamily: "'Playfair Display', serif" }
                   : {}
               }
+              data-content-key="contact.headline"
             >
               {content.contact.headline}
             </h1>
-            <p className={`${classes.subtext} text-xl`}>
+            <p className={`${classes.subtext} text-xl`} data-content-key="contact.intro">
               {content.contact.intro}
             </p>
           </div>
@@ -128,12 +155,13 @@ export default function Contact() {
                     ? { fontFamily: "'Playfair Display', serif" }
                     : {}
                 }
+                data-content-key="contact.form_title"
               >
                 {content.contact.form_title}
               </h2>
 
               {submitted && (
-                <div className={`${classes.accentBg} text-white p-4 rounded-lg mb-6`}>
+                <div className={`${classes.accentBg} text-white p-4 rounded-lg mb-6`} data-content-key="contact.form_success">
                   {content.contact.form_success}
                 </div>
               )}
@@ -275,8 +303,9 @@ export default function Contact() {
                       ? { fontFamily: "'Playfair Display', serif" }
                       : {}
                   }
+                  data-content-key="contact.info_heading"
                 >
-                  Contact Information
+                  {content.contact.info_heading}
                 </h3>
                 <div className="space-y-4">
                   <a
@@ -286,7 +315,7 @@ export default function Contact() {
                     <Phone className={`w-6 h-6 ${classes.accent} mt-1 flex-shrink-0`} />
                     <div>
                       <p className="font-semibold">Phone</p>
-                      <p>{content.business.phone_display}</p>
+                      <p data-content-key="business.phone_display">{content.business.phone_display}</p>
                     </div>
                   </a>
                   <a
@@ -299,11 +328,11 @@ export default function Contact() {
                     <div>
                       <p className="font-semibold">Address</p>
                       <p>
-                        {content.business.address_line1}
+                        <span data-content-key="business.address_line1">{content.business.address_line1}</span>
                         <br />
-                        {content.business.address_line2}
+                        <span data-content-key="business.address_line2">{content.business.address_line2}</span>
                         <br />
-                        {content.business.address_country}
+                        <span data-content-key="business.address_country">{content.business.address_country}</span>
                       </p>
                     </div>
                   </a>
@@ -316,7 +345,7 @@ export default function Contact() {
                     <Facebook className={`w-6 h-6 ${classes.accent} mt-1 flex-shrink-0`} />
                     <div>
                       <p className="font-semibold">Facebook</p>
-                      <p>{content.business.facebook_handle}</p>
+                      <p data-content-key="business.facebook_handle">{content.business.facebook_handle}</p>
                     </div>
                   </a>
                 </div>
@@ -335,25 +364,29 @@ export default function Contact() {
                       ? { fontFamily: "'Playfair Display', serif" }
                       : {}
                   }
+                  data-content-key="contact.hours_heading"
                 >
                   <Clock className={`w-6 h-6 ${classes.accent} mr-2`} />
-                  Hours of Operation
+                  {content.contact.hours_heading}
                 </h3>
                 <div className="space-y-2">
-                  {content.hours.map((item) => (
+                  {content.hours.map((item, i) => (
                     <div
                       key={item.day}
                       className={`flex justify-between ${classes.text}`}
+                      data-reorderable="hours"
+                      data-reorder-index={i}
+                      data-drag-handle-only
                     >
-                      <span className="font-semibold">{item.day}</span>
-                      <span>{item.time}</span>
+                      <span className="font-semibold" data-content-key={`hours.${i}.day`}>{item.day}</span>
+                      <span data-content-key={`hours.${i}.time`}>{item.time}</span>
                     </div>
                   ))}
                 </div>
-                <p className={`${classes.accent} font-semibold mt-6 text-center`}>
+                <p className={`${classes.accent} font-semibold mt-6 text-center`} data-content-key="contact.walk_ins_note">
                   {content.contact.walk_ins_note}
                 </p>
-                <p className={`${classes.text} text-center mt-4`}>
+                <p className={`${classes.text} text-center mt-4`} data-content-key="contact.gift_cards_note">
                   {content.contact.gift_cards_note}
                 </p>
               </div>
@@ -373,12 +406,20 @@ export default function Contact() {
                   />
                 </div>
 
-                <div className={`${classes.cardBg} rounded-2xl overflow-hidden shadow-xl`}>
+                <div className={`${classes.cardBg} rounded-2xl overflow-hidden shadow-xl relative`}>
                   <img
-                    src={assetUrl(content.contact.storefront_image)}
+                    src={imageSrc(content.contact.storefront_image)}
                     alt={`${content.business.name} Storefront`}
                     className="w-full h-full object-cover"
                   />
+                  {isPreview && (
+                    <button
+                      onClick={() => openImgUpload("contact.storefront_image")}
+                      className="absolute top-2 right-2 z-20 bg-black/60 hover:bg-black/80 text-white px-3 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer"
+                    >
+                      📷 Change Photo
+                    </button>
+                  )}
                 </div>
               </div>
             </div>

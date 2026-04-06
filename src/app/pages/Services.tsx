@@ -1,10 +1,11 @@
 import { useTheme } from "../context/ThemeContext";
 import { Link } from "react-router";
 import { imageSrc } from "../lib/assets";
-import content from "@/content.json";
+import { useContent } from "../hooks/useContent";
 
 export default function Services() {
   const { theme } = useTheme();
+  const content = useContent();
 
   const getThemeClasses = () => {
     switch (theme) {
@@ -60,12 +61,12 @@ export default function Services() {
                   ? { fontFamily: "'Playfair Display', serif" }
                   : {}
               }
+              data-content-key="services_page.headline"
             >
-              Our Services
+              {content.services_page.headline}
             </h1>
-            <p className={`${classes.subtext} text-xl`}>
-              From classic manicures to custom nail art, we offer a full range of
-              nail care and spa services to make you look and feel amazing.
+            <p className={`${classes.subtext} text-xl`} data-content-key="services_page.intro">
+              {content.services_page.intro}
             </p>
           </div>
 
@@ -75,6 +76,9 @@ export default function Services() {
               <div
                 key={index}
                 className={`${classes.cardBg} rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-shadow`}
+                data-reorderable="services"
+                data-reorder-index={index}
+                data-drag-handle-only
               >
                 <div className="h-64 overflow-hidden">
                   <img
@@ -95,10 +99,11 @@ export default function Services() {
                         ? { fontFamily: "'Playfair Display', serif" }
                         : {}
                     }
+                    data-content-key={`services.${index}.title`}
                   >
                     {service.title}
                   </h3>
-                  <p className={`${classes.subtext} mb-4`}>
+                  <p className={`${classes.subtext} mb-4`} data-content-key={`services.${index}.description`}>
                     {service.description}
                   </p>
                   <ul className="space-y-2 mb-6">
@@ -108,7 +113,7 @@ export default function Services() {
                         className={`${classes.text} flex items-center`}
                       >
                         <span className={`${classes.accent} mr-2`}>•</span>
-                        {item}
+                        <span data-content-key={`services.${index}.items.${itemIndex}`}>{item}</span>
                       </li>
                     ))}
                   </ul>
@@ -139,10 +144,11 @@ export default function Services() {
                 ? { fontFamily: "'Playfair Display', serif" }
                 : {}
             }
+            data-content-key="services_page.gift_cards_headline"
           >
-            Gift Cards Available
+            {content.services_page.gift_cards_headline}
           </h2>
-          <p className={`${classes.subtext} text-xl mb-8 max-w-2xl mx-auto`}>
+          <p className={`${classes.subtext} text-xl mb-8 max-w-2xl mx-auto`} data-content-key="contact.gift_cards_note">
             {content.contact.gift_cards_note}
           </p>
           <div className="flex flex-wrap justify-center gap-4">
@@ -156,7 +162,7 @@ export default function Services() {
                   : "border-[#e91e8c]"
               } px-8 py-4 rounded-full font-semibold hover:opacity-80 transition-opacity inline-block`}
             >
-              Call {content.business.phone_display}
+              Call <span data-content-key="business.phone_display">{content.business.phone_display}</span>
             </a>
             <Link
               to="/contact"

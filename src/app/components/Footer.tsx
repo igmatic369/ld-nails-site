@@ -1,10 +1,11 @@
 import { MapPin, Phone, Facebook, Clock } from "lucide-react";
 import { Link } from "react-router";
 import { useTheme } from "../context/ThemeContext";
-import content from "@/content.json";
+import { useContent } from "../hooks/useContent";
 
 export default function Footer() {
   const { theme } = useTheme();
+  const content = useContent();
 
   const getThemeClasses = () => {
     switch (theme) {
@@ -40,8 +41,8 @@ export default function Footer() {
         <div className="grid md:grid-cols-3 gap-8">
           {/* Contact Info */}
           <div>
-            <h3 className={`text-xl font-bold ${classes.accent} mb-4`}>
-              Contact Us
+            <h3 className={`text-xl font-bold ${classes.accent} mb-4`} data-content-key="footer.contact_heading">
+              {content.footer.contact_heading}
             </h3>
             <div className="space-y-3">
               <a
@@ -49,7 +50,7 @@ export default function Footer() {
                 className={`flex items-start space-x-3 ${classes.hover} transition-colors`}
               >
                 <Phone className="w-5 h-5 mt-1 flex-shrink-0" />
-                <span>{content.business.phone_display}</span>
+                <span data-content-key="business.phone_display">{content.business.phone_display}</span>
               </a>
               <a
                 href={content.contact.google_maps_link}
@@ -59,11 +60,11 @@ export default function Footer() {
               >
                 <MapPin className="w-5 h-5 mt-1 flex-shrink-0" />
                 <span>
-                  {content.business.address_line1}
+                  <span data-content-key="business.address_line1">{content.business.address_line1}</span>
                   <br />
-                  {content.business.address_line2}
+                  <span data-content-key="business.address_line2">{content.business.address_line2}</span>
                   <br />
-                  {content.business.address_country}
+                  <span data-content-key="business.address_country">{content.business.address_country}</span>
                 </span>
               </a>
               <a
@@ -80,15 +81,21 @@ export default function Footer() {
 
           {/* Hours */}
           <div>
-            <h3 className={`text-xl font-bold ${classes.accent} mb-4 flex items-center`}>
+            <h3 className={`text-xl font-bold ${classes.accent} mb-4 flex items-center`} data-content-key="footer.hours_heading">
               <Clock className="w-5 h-5 mr-2" />
-              Hours of Operation
+              {content.footer.hours_heading}
             </h3>
             <div className="space-y-2 text-sm">
-              {content.hours.map((item) => (
-                <div key={item.day} className="flex justify-between">
-                  <span className="font-medium">{item.day}</span>
-                  <span>{item.time}</span>
+              {content.hours.map((item, i) => (
+                <div
+                  key={item.day}
+                  className="flex justify-between"
+                  data-reorderable="hours"
+                  data-reorder-index={i}
+                  data-drag-handle-only
+                >
+                  <span className="font-medium" data-content-key={`hours.${i}.day`}>{item.day}</span>
+                  <span data-content-key={`hours.${i}.time`}>{item.time}</span>
                 </div>
               ))}
             </div>
@@ -96,8 +103,8 @@ export default function Footer() {
 
           {/* Quick Links */}
           <div>
-            <h3 className={`text-xl font-bold ${classes.accent} mb-4`}>
-              Quick Links
+            <h3 className={`text-xl font-bold ${classes.accent} mb-4`} data-content-key="footer.links_heading">
+              {content.footer.links_heading}
             </h3>
             <nav className="space-y-2">
               <Link to="/" className={`block ${classes.hover} transition-colors`}>Home</Link>
@@ -111,8 +118,8 @@ export default function Footer() {
         </div>
 
         <div className="mt-12 pt-8 border-t border-gray-700 text-center text-sm">
-          <p>© {new Date().getFullYear()} {content.business.name}. All rights reserved.</p>
-          <p className="mt-2">{content.contact.walk_ins_note}</p>
+          <p>© {new Date().getFullYear()} <span data-content-key="business.name">{content.business.name}</span>. All rights reserved.</p>
+          <p className="mt-2" data-content-key="contact.walk_ins_note">{content.contact.walk_ins_note}</p>
         </div>
       </div>
     </footer>

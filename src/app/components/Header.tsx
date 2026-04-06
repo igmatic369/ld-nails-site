@@ -2,11 +2,12 @@ import { Link } from "react-router";
 import { Menu, Phone, X } from "lucide-react";
 import { useState } from "react";
 import { useTheme } from "../context/ThemeContext";
-import content from "@/content.json";
+import { useContent } from "../hooks/useContent";
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { theme } = useTheme();
+  const content = useContent();
 
   const getThemeClasses = () => {
     switch (theme) {
@@ -55,10 +56,15 @@ export default function Header() {
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
             <div className="flex flex-col">
-              <span className={`text-2xl font-bold ${classes.accent} font-[Abril_Fatface]`}>
+              <span
+                className={`text-2xl font-bold ${classes.accent} font-[Abril_Fatface]`}
+                data-content-key="business.name"
+              >
                 {content.business.name}
               </span>
-              <span className="text-xs opacity-75">{content.business.address_city_short}</span>
+              <span className="text-xs opacity-75" data-content-key="business.address_city_short">
+                {content.business.address_city_short}
+              </span>
             </div>
           </Link>
 
@@ -81,7 +87,7 @@ export default function Header() {
             className={`hidden lg:flex items-center space-x-2 ${classes.accent} ${classes.border} border-2 px-4 py-2 rounded-full hover:opacity-80 transition-opacity`}
           >
             <Phone className="w-4 h-4" />
-            <span>{content.business.phone_display}</span>
+            <span data-content-key="business.phone_display">{content.business.phone_display}</span>
           </a>
 
           {/* Mobile Menu Button */}
@@ -116,7 +122,7 @@ export default function Header() {
               className={`flex items-center space-x-2 ${classes.accent} pt-2`}
             >
               <Phone className="w-4 h-4" />
-              <span>{content.business.phone_display}</span>
+              <span data-content-key="business.phone_display">{content.business.phone_display}</span>
             </a>
           </nav>
         )}
